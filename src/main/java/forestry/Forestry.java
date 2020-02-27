@@ -73,13 +73,14 @@ import forestry.plugins.PluginTechReborn;
 	version = Constants.VERSION,
 	guiFactory = "forestry.core.config.ForestryGuiConfigFactory",
 	acceptedMinecraftVersions = "[1.12.2,1.13.0)",
-	dependencies = "required-after:forge@[14.23.4.2749,);"
-		+ "after:jei@[4.7.8.91,);"
+	dependencies = "required-after:forge@[14.23.5.2847,);"
+		+ "after:jei@[4.12.0.0,);"
 		+ "after:" + PluginIC2.MOD_ID + ";"
 		+ "after:" + PluginNatura.MOD_ID + ";"
 		+ "after:toughasnails;"
 		+ "after:" + PluginTechReborn.MOD_ID + ";"
-		+ "after:" + PluginBuildCraftFuels.MOD_ID + ";")
+		+ "after:" + PluginBuildCraftFuels.MOD_ID + ";"
+		+ "before:binniecore@[2.5.1.184,)")
 public class Forestry {
 
 	@SuppressWarnings("NullableProblems")

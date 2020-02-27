@@ -30,6 +30,8 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import forestry.api.climate.ClimateManager;
+import forestry.api.climate.IClimateListener;
 import forestry.api.core.EnumHumidity;
 import forestry.api.core.EnumTemperature;
 import forestry.api.core.IErrorLogic;
@@ -81,6 +83,7 @@ public abstract class TilePlanter extends TilePowered implements IFarmHousing, I
 	private final TankManager tankManager;
 	private final StandardTank resourceTank;
 	private final OwnerHandler ownerHandler = new OwnerHandler();
+	private final IClimateListener listener;
 
 	private int platformHeight = -1;
 	private Stage stage = Stage.CULTIVATE;
@@ -107,6 +110,7 @@ public abstract class TilePlanter extends TilePowered implements IFarmHousing, I
 		this.resourceTank = new FilteredTank(Constants.PROCESSOR_TANK_CAPACITY).setFilters(FluidRegistry.WATER);
 
 		this.tankManager = new TankManager(this, resourceTank);
+		this.listener = ClimateManager.climateFactory.createListener(this);
 		setEnergyPerWorkCycle(10);
 		setTicksPerWorkCycle(2);
 	}
@@ -177,7 +181,7 @@ public abstract class TilePlanter extends TilePowered implements IFarmHousing, I
 			List<FarmTarget> farmTargets = targets.get(farmSide);
 
 			if (stage == Stage.HARVEST) {
-				Collection<ICrop> harvested = FarmHelper.harvestTargets(world, farmTargets, logic, Collections.emptySet());
+				Collection<ICrop> harvested = FarmHelper.harvestTargets(world, this, farmTargets, logic, Collections.emptySet());
 				farmWorkStatus.didWork = !harvested.isEmpty();
 				if (!harvested.isEmpty()) {
 					pendingCrops.addAll(harvested);
@@ -314,7 +318,7 @@ public abstract class TilePlanter extends TilePowered implements IFarmHousing, I
 			}
 		}
 
-		if (hasFarmland && !FarmHelper.isCycleCanceledByListeners(logic, farmSide, Collections.emptySet())) {
+		if (hasFarmland) {
 			final float hydrationModifier = hydrationManager.getHydrationModifier();
 			final int fertilizerConsumption = Math.round(logic.getFertilizerConsumption() * Config.fertilizerModifier * 2);
 			final int liquidConsumption = logic.getWaterConsumption(hydrationModifier);
@@ -492,14 +496,12 @@ public abstract class TilePlanter extends TilePowered implements IFarmHousing, I
 
 	@Override
 	public float getExactTemperature() {
-		BlockPos coords = getCoordinates();
-		return world.getBiome(coords).getTemperature(coords);
+		return listener.getExactTemperature();
 	}
 
 	@Override
 	public float getExactHumidity() {
-		BlockPos coords = getCoordinates();
-		return world.getBiome(coords).getRainfall();
+		return listener.getExactHumidity();
 	}
 
 	@Override
@@ -531,5 +533,10 @@ public abstract class TilePlanter extends TilePowered implements IFarmHousing, I
 	public abstract NonNullList<ItemStack> createResourceStacks();
 
 	public abstract NonNullList<ItemStack> createProductionStacks();
+
+	@Override
+	public void addPendingProduce(ItemStack stack) {
+		pendingProduce.push(stack);
+	}
 
 }

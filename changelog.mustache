@@ -3,7 +3,14 @@ Please help the Forestry project by <a href="https://github.com/ForestryMC/Fores
     <h3>{{name}}</h3>
     <ul>
         {{#commits}}
-            <li>{{{message}}} - {{authorName}}</li>
+            <li>
+                <a href="https://github.com/ForestryMC/ForestryMC/commit/{{hashFull}}">{{{messageTitle}}}</a> - {{{authorName}}}
+                <ul>
+                    {{#messageBodyItems}}
+                        <li>{{.}}</li>
+                    {{/messageBodyItems}}
+                </ul>
+            </li>
         {{/commits}}
     </ul>
 {{/tags}}
